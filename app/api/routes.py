@@ -4,8 +4,6 @@ from app.sql.analytics import (
     get_top_region
 )
 
-
-
 router = APIRouter()
 
 
@@ -16,8 +14,6 @@ def chat(payload: dict):
         "question",
         ""
     ).lower()
-
-    # SQL Analytics Queries
 
     if "total sales" in question and "2025" in question:
 
@@ -52,28 +48,10 @@ def chat(payload: dict):
             "fallback": False
         }
 
-    # LLM Fallback
-
-    try:
-
-        llm_answer = ask_llm(question)
-
-        return {
-            "answer": llm_answer,
-            "confidence": 0.85,
-            "source_type": "llm",
-            "sources": [
-                "OpenAI"
-            ],
-            "fallback": False
-        }
-
-    except Exception as e:
-
-        return {
-            "answer": f"LLM Error: {str(e)}",
-            "confidence": 0.10,
-            "source_type": "error",
-            "sources": [],
-            "fallback": True
-        }
+    return {
+        "answer": "Question not supported yet.",
+        "confidence": 0.30,
+        "source_type": "fallback",
+        "sources": [],
+        "fallback": True
+    }
