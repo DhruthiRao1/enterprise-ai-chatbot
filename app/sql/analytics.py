@@ -10,7 +10,6 @@ def get_total_sales(year):
 
 
 def compare_sales_last_3_years():
-
     sales = (
         df.groupby("Year")["Sales"]
         .sum()
@@ -21,7 +20,6 @@ def compare_sales_last_3_years():
 
 
 def get_highest_growth_region():
-
     region_sales = (
         df.groupby("Region")["Sales"]
         .sum()
@@ -37,7 +35,6 @@ def get_highest_growth_region():
 
 
 def get_quarterly_sales():
-
     quarterly = (
         df.groupby("Quarter")["Sales"]
         .sum()
@@ -48,7 +45,6 @@ def get_quarterly_sales():
 
 
 def get_top_products():
-
     products = (
         df.groupby("Product")["Sales"]
         .sum()
@@ -63,7 +59,6 @@ def get_top_products():
 
 
 def summarize_sales_report():
-
     total_sales = df["Sales"].sum()
 
     top_product = (
@@ -83,3 +78,21 @@ def summarize_sales_report():
         f"Top product was {top_product}. "
         f"Top region was {top_region}."
     )
+
+
+def get_top_region():
+    region_sales = (
+        df.groupby("Region")["Sales"]
+        .sum()
+        .reset_index()
+    )
+
+    top_region = region_sales.sort_values(
+        "Sales",
+        ascending=False
+    ).iloc[0]
+
+    return {
+        "region": top_region["Region"],
+        "revenue": float(top_region["Sales"])
+    }
