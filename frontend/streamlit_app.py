@@ -1,56 +1,102 @@
 import streamlit as st
 import requests
 
+# Railway Backend URL
 API_URL = "https://enterprise-ai-chatbot-production.up.railway.app/chat"
 
 st.set_page_config(
-    page_title="Enterprise AI Assistant",
-    page_icon="🤖"
+    page_title="Enterprise AI Chatbot",
+    page_icon="🤖",
+    layout="wide"
 )
 
-st.title("🤖 Enterprise AI Assistant")
+st.title("🤖 Enterprise AI Chatbot")
+st.markdown(
+    """
+    Ask business questions about sales data.
+    Examples:
+    - Show total sales for 2025
+    - Compare sales for the last three years
+    - Which region had the highest growth?
+    - Show quarterly sales trends
+    - Which products contributed most to revenue?
+    - Summarize last year's sales report
+    """
+)
 
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+question = st.text_input(
+    "Enter your question:",
+    placeholder="Show total sales for 2025"
+)
 
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.write(msg["content"])
+if st.button("Ask"):
 
-prompt = st.chat_input("Ask a question")
+    if not question.strip():
+        st.warning("Please enter a question.")
+    else:
+        with st.spinner("Analyzing..."):
 
-if prompt:
+            try:
+                response = requests.post(
+                    API_URL,
+                    json={"question": question},
+                    timeout=30
+                )
 
-    st.session_state.messages.append(
-        {
-            "role": "user",
-            "content": prompt
-        }
-    )
+                if response.status_code == 200:
 
-    with st.chat_message("user"):
-        st.write(prompt)
+                    result = response.json()
 
-    try:
+                    st.success("Response Generated")
 
-        response = requests.post(
-            API_URL,
-            json={
-                "question": prompt
-            }
-        )
+                    st.subheader("Answer")
+                    st.write(result.get("answer"))
 
-        answer = response.json()["answer"]
+                    st.subheader("Metadata")
 
-    except Exception as e:
-        answer = f"Error: {str(e)}"
+                    col1, col2, col3 = st.columns(3)
 
-    st.session_state.messages.append(
-        {
-            "role": "assistant",
-            "content": answer
-        }
-    )
+                    with col1:
+                        st.metric(
+                            "Confidence",
+                            result.get("confidence", 0)
+                        )
 
-    with st.chat_message("assistant"):
-        st.write(answer)
+                    with col2:
+                        st.metric(
+                            "Source Type",
+                            result.get("source_type", "N/A")
+                        )
+
+                    with col3:
+                        st.metric(
+                            "Fallback",
+                            str(result.get("fallback", False))
+                        )
+
+                    st.write("Sources:")
+                    st.write(result.get("sources", []))
+
+                else:
+                    st.error(
+                        f"API Error: {response.status_code}"
+                    )
+
+            except Exception as e:
+                st.error(f"Error: {str(e)}")
+
+st.divider()
+
+st.subheader("Quick Test Questions")
+
+sample_questions = [
+    "Show total sales for 2025",
+    "Compare sales for the last three years",
+    "Which region had the highest growth?",
+    "Show quarterly sales trends",
+    "Which products contributed most to revenue?",
+    "Summarize last year's sales report"
+]
+
+for q in sample_questions:
+    st.write(f"• {q}")
