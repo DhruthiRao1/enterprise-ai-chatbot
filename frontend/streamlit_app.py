@@ -10,46 +10,47 @@ st.set_page_config(
 
 st.title("🤖 Enterprise AI Assistant")
 
-question = st.text_input(
-    "Ask a question",
-    placeholder="Show total sales for 2025"
-)
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-if st.button("Submit"):
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.write(msg["content"])
 
-    response = requests.post(
-        API_URL,
-        json={
-            "question": question
+prompt = st.chat_input("Ask a question")
+
+if prompt:
+
+    st.session_state.messages.append(
+        {
+            "role": "user",
+            "content": prompt
         }
     )
 
-    if response.status_code == 200:
+    with st.chat_message("user"):
+        st.write(prompt)
 
-        result = response.json()
+    try:
 
-        st.success("Response Generated")
-
-        st.write(
-            result["answer"]
+        response = requests.post(
+            API_URL,
+            json={
+                "question": prompt
+            }
         )
 
-        st.write(
-            f"Confidence: {result['confidence']}"
-        )
+        answer = response.json()["answer"]
 
-        st.write(
-            f"Source Type: {result['source_type']}"
-        )
+    except Exception as e:
+        answer = f"Error: {str(e)}"
 
-        st.write(
-            "Sources:"
-        )
+    st.session_state.messages.append(
+        {
+            "role": "assistant",
+            "content": answer
+        }
+    )
 
-        for source in result["sources"]:
-            st.write(source)
-
-    else:
-        st.error(
-            "API Error"
-        )
+    with st.chat_message("assistant"):
+        st.write(answer)
