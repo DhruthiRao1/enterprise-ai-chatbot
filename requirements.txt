@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+streamlit
+pandas
+sqlalchemy
+chromadb
+langchain
+langchain-openai
+openai
+python-dotenv
+pydantic
+requests
+pdfplumber
+python-docx
+pytesseract
+plotly
