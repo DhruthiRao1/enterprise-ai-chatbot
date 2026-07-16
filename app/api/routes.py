@@ -4,7 +4,7 @@ from app.sql.analytics import (
     get_top_region
 )
 
-from app.llm import ask_llm
+
 
 router = APIRouter()
 
